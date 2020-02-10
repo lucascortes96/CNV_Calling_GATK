@@ -77,3 +77,19 @@ for i in *.sorted.bam;
  -L filtered_intervals.interval_list
  --interval-merging-rule OVERLAPPING_ONLY
  -O $code.counts.hdf5; done
+ 
+ #Need to activate mini conda environment
+## Determine Germline CONTIG PLOIDY, can use an input list or alternatively add every filename in individually 
+../../programs/gatk-4.1.2.0/gatk-package-4.1.2.0-local.jar DetermineGermlineContigPloidy --input 5270-S1_S1.counts.hdf5  
+--contig-ploidy-priors ploidy_priors.tsv --output ../Little_Campbell_Stream_CNV --output-prefix normal_cohort
+
+## GermlineCNVCaller, again you can use an interval list
+../../programs/gatk-4.1.2.0/gatk-package-4.1.2.0-local.jar GermlineCNVCaller --run-mode COHORT -L filtered_intervals.interval_list 
+--interval-merging-rule OVERLAPPING_ONLY --contig-ploidy-calls ../Little_Campbell_Stream_CNV/normal_cohort-calls 
+--input 5270-S1_S1.counts.hdf5 --output ../Little_Campbell_Stream_CNV --output-prefix normal_cohort_run
+
+## PostProcessGermlineCNVCalls
+../../programs/gatk-4.1.2.0/gatk-package-4.1.2.0-local.jar PostprocessGermlineCNVCalls --contig-ploidy-calls normal_cohort-calls 
+--calls-shard-path normal_cohort_run-calls --model-shard-path normal_cohort_run-model 
+--output-genotyped-intervals sample_x_genotyped_intervals.vcf --output-genotyped-segments sample_x_genotyped_segments.vcf
+
